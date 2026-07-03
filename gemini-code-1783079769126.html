@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace | 优雅网址导航</title>
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-title: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --primary: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --hover-bg: #f1f5f9;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(99, 102, 241, 0.1), 0 8px 10px -6px rgba(99, 102, 241, 0.05);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            padding: 60px 20px;
+            letter-spacing: -0.01em;
+        }
+
+        /* 顶部大气的 Header */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* 聚合搜索聚合组件 */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+            background: var(--card-bg);
+            padding: 6px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #e2e8f0;
+            transition: var(--transition);
+        }
+
+        .search-container:focus-within {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .search-engine {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: #eef2ff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            outline: none;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 10px 4px;
+            font-size: 1rem;
+            color: var(--text-title);
+            background: transparent;
+        }
+
+        .search-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .search-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 响应式网格布局 */
+        .main-grid {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 28px;
+        }
+
+        /* 卡片精致样式 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #f1f5f9;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-md);
+            border-color: #e2e8f0;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-title);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-count {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--hover-bg);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        /* 链接按钮组 */
+        .links-layout {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 14px;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-body);
+            font-size: 0.92rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid #f1f5f9;
+            transition: var(--transition);
+        }
+
+        .link-item:hover {
+            background: var(--primary-gradient);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+            transform: scale(1.02);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 30px;
+        }
+
+        /* 移动端完美适配 */
+        @media (max-width: 640px) {
+            body { padding: 40px 12px; }
+            header h1 { font-size: 2.2rem; }
+            .search-container { flex-wrap: wrap; border-radius: 16px; padding: 10px; }
+            .search-engine { width: 100%; margin-right: 0; margin-bottom: 8px; text-align: center; }
+            .search-btn { width: 100%; margin-top: 8px; }
+            .links-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>My Workspace</h1>
+        <p>聚合全网主流优质站点 · 10 大分类 · 100 个全时守候</p>
+    </header>
+
+    <div class="search-container">
+        <select class="search-engine" id="engineSelect">
+            <option value="https://www.baidu.com/s?wd=">百度</option>
+            <option value="https://www.google.com/search?q=">Google</option>
+            <option value="https://www.bing.com/search?q=">必应</option>
+        </select>
+        <input type="text" class="search-input" id="searchInput" placeholder="输入关键词，一键探索互联网..." onkeydown="if(event.keyCode==13) doSearch()">
+        <button class="search-btn" onclick="doSearch()">搜 索</button>
+    </div>
+
+    <div class="main-grid">
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🔍 常用搜索 & 门户</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.baidu.com" target="_blank">百度</a>
+                <a class="link-item" href="https://www.google.com" target="_blank">Google</a>
+                <a class="link-item" href="https://www.bing.com" target="_blank">必应</a>
+                <a class="link-item" href="https://www.qq.com" target="_blank">腾讯网</a>
+                <a class="link-item" href="https://www.sina.com.cn" target="_blank">新浪网</a>
+                <a class="link-item" href="https://www.163.com" target="_blank">网易</a>
+                <a class="link-item" href="https://www.sohu.com" target="_blank">搜狐网</a>
+                <a class="link-item" href="https://www.yahoo.com" target="_blank">Yahoo</a>
+                <a class="link-item" href="https://duckduckgo.com" target="_blank">DuckDuckGo</a>
+                <a class="link-item" href="https://www.so.com" target="_blank">360搜索</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">💬 社交 & 兴趣社区</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://wx.qq.com" target="_blank">微信网页版</a>
+                <a class="link-item" href="https://weibo.com" target="_blank">新浪微博</a>
+                <a class="link-item" href="https://www.zhihu.com" target="_blank">知乎</a>
+                <a class="link-item" href="https://www.douban.com" target="_blank">豆瓣</a>
+                <a class="link-item" href="https://www.xiaohongshu.com" target="_blank">小红书</a>
+                <a class="link-item" href="https://tieba.baidu.com" target="_blank">百度贴吧</a>
+                <a class="link-item" href="https://x.com" target="_blank">X (Twitter)</a>
+                <a class="link-item" href="https://www.facebook.com" target="_blank">Facebook</a>
+                <a class="link-item" href="https://www.instagram.com" target="_blank">Instagram</a>
+                <a class="link-item" href="https://www.reddit.com" target="_blank">Reddit</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🎬 影音 & 潮流娱乐</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.bilibili.com" target="_blank">哔哩哔哩</a>
+                <a class="link-item" href="https://www.youku.com" target="_blank">优酷视频</a>
+                <a class="link-item" href="https://www.iqiyi.com" target="_blank">爱奇艺</a>
+                <a class="link-item" href="https://v.qq.com" target="_blank">腾讯视频</a>
+                <a class="link-item" href="https://www.youtube.com" target="_blank">YouTube</a>
+                <a class="link-item" href="https://www.tiktok.com" target="_blank">TikTok</a>
+                <a class="link-item" href="https://music.163.com" target="_blank">网易云音乐</a>
+                <a class="link-item" href="https://y.qq.com" target="_blank">QQ音乐</a>
+                <a class="link-item" href="https://www.netflix.com" target="_blank">Netflix</a>
+                <a class="link-item" href="https://www.spotify.com" target="_blank">Spotify</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📰 深度新闻 & 资讯</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.thepaper.cn" target="_blank">澎湃新闻</a>
+                <a class="link-item" href="https://www.guancha.cn" target="_blank">观察者网</a>
+                <a class="link-item" href="https://www.jiemian.com" target="_blank">界面新闻</a>
+                <a class="link-item" href="https://www.xinhuanet.com" target="_blank">新华网</a>
+                <a class="link-item" href="https://www.people.com.cn" target="_blank">人民网</a>
+                <a class="link-item" href="https://www.huxiu.com" target="_blank">虎嗅网</a>
+                <a class="link-item" href="https://36kr.com" target="_blank">36氪</a>
+                <a class="link-item" href="https://www.bbc.com" target="_blank">BBC News</a>
+                <a class="link-item" href="https://edition.cnn.com" target="_blank">CNN</a>
+                <a class="link-item" href="https://www.reuters.com" target="_blank">路透社</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🛍️ 头部电商 & 购物</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.taobao.com" target="_blank">淘宝网</a>
+                <a class="link-item" href="https://www.jd.com" target="_blank">京东商城</a>
+                <a class="link-item" href="https://www.pinduoduo.com" target="_blank">拼多多</a>
+                <a class="link-item" href="https://www.tmall.com" target="_blank">天猫商城</a>
+                <a class="link-item" href="https://www.vip.com" target="_blank">唯品会</a>
+                <a class="link-item" href="https://2.taobao.com" target="_blank">闲鱼</a>
+                <a class="link-item" href="https://www.amazon.com" target="_blank">亚马逊</a>
+                <a class="link-item" href="https://www.ebay.com" target="_blank">eBay</a>
+                <a class="link-item" href="https://www.aliexpress.com" target="_blank">速卖通</a>
+                <a class="link-item" href="https://www.meituan.com" target="_blank">美团网</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🛠️ 生产力工具 & 效率</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.feishu.cn" target="_blank">飞书</a>
+                <a class="link-item" href="https://www.dingtalk.com" target="_blank">钉钉</a>
+                <a class="link-item" href="https://docs.qq.com" target="_blank">腾讯文档</a>
+                <a class="link-item" href="https://www.kdocs.cn" target="_blank">金山文档</a>
+                <a class="link-item" href="https://pan.baidu.com" target="_blank">百度网盘</a>
+                <a class="link-item" href="https://www.aliyundrive.com" target="_blank">阿里云盘</a>
+                <a class="link-item" href="https://www.notion.so" target="_blank">Notion</a>
+                <a class="link-item" href="https://github.com" target="_blank">GitHub</a>
+                <a class="link-item" href="https://www.yuque.com" target="_blank">语雀</a>
+                <a class="link-item" href="https://modao.cc" target="_blank">墨刀</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">💻 极客科技 & 编程</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.csdn.net" target="_blank">CSDN</a>
+                <a class="link-item" href="https://juejin.cn" target="_blank">稀土掘金</a>
+                <a class="link-item" href="https://www.oschina.net" target="_blank">开源中国</a>
+                <a class="link-item" href="https://stackoverflow.com" target="_blank">StackOverflow</a>
+                <a class="link-item" href="https://www.v2ex.com" target="_blank">V2EX</a>
+                <a class="link-item" href="https://www.cnblogs.com" target="_blank">博客园</a>
+                <a class="link-item" href="https://www.infoq.cn" target="_blank">InfoQ</a>
+                <a class="link-item" href="https://segmentfault.com" target="_blank">思否</a>
+                <a class="link-item" href="https://www.w3school.com.cn" target="_blank">W3School</a>
+                <a class="link-item" href="https://developer.mozilla.org" target="_blank">MDN Web</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">🎓 全球学习 & 教育</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.icourse163.org" target="_blank">中国大学MOOC</a>
+                <a class="link-item" href="https://open.163.com" target="_blank">网易公开课</a>
+                <a class="link-item" href="https://www.coursera.org" target="_blank">Coursera</a>
+                <a class="link-item" href="https://www.udemy.com" target="_blank">Udemy</a>
+                <a class="link-item" href="https://www.shanbay.com" target="_blank">扇贝</a>
+                <a class="link-item" href="https://www.baicizhan.com" target="_blank">百词斩</a>
+                <a class="link-item" href="https://www.wikipedia.org" target="_blank">维基百科</a>
+                <a class="link-item" href="https://baike.baidu.com" target="_blank">百度百科</a>
+                <a class="link-item" href="https://www.cnki.net" target="_blank">中国知网</a>
+                <a class="link-item" href="https://www.yixueguan.com" target="_blank">译学馆</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">✈️ 环球旅游 & 出行</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.ctrip.com" target="_blank">携程旅行</a>
+                <a class="link-item" href="https://www.qunar.com" target="_blank">去哪儿网</a>
+                <a class="link-item" href="https://www.fliggy.com" target="_blank">飞猪旅行</a>
+                <a class="link-item" href="https://www.ly.com" target="_blank">同程旅行</a>
+                <a class="link-item" href="https://www.mafengwo.cn" target="_blank">马蜂窝</a>
+                <a class="link-item" href="https://www.qyer.com" target="_blank">穷游网</a>
+                <a class="link-item" href="https://map.baidu.com" target="_blank">百度地图</a>
+                <a class="link-item" href="https://www.amap.com" target="_blank">高德地图</a>
+                <a class="link-item" href="https://www.booking.com" target="_blank">Booking</a>
+                <a class="link-item" href="https://www.airbnb.cn" target="_blank">爱彼迎</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">📈 全球金融 & 财经</div>
+                <span class="card-count">10 SITES</span>
+            </div>
+            <div class="links-layout">
+                <a class="link-item" href="https://www.eastmoney.com" target="_blank">东方财富网</a>
+                <a class="link-item" href="https://www.10jqka.com.cn" target="_blank">同花顺</a>
+                <a class="link-item" href="https://finance.sina.com.cn" target="_blank">新浪财经</a>
+                <a class="link-item" href="https://xueqiu.com" target="_blank">雪球</a>
+                <a class="link-item" href="https://wallstreetcn.com" target="_blank">华尔街见闻</a>
+                <a class="link-item" href="https://www.yicai.com" target="_blank">第一财经</a>
+                <a class="link-item" href="https://www.hexun.com" target="_blank">和讯网</a>
+                <a class="link-item" href="https://www.caixin.com" target="_blank">财新网</a>
+                <a class="link-item" href="https://www.jin10.com" target="_blank">金十数据</a>
+                <a class="link-item" href="https://cn.investing.com" target="_blank">英为财情</a>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2026 优雅个人导航控制台 · 高效连接世界</p>
+    </footer>
+
+    <script>
+        function doSearch() {
+            var engine = document.getElementById('engineSelect').value;
+            var keyword = document.getElementById('searchInput').value;
+            if(keyword.trim() !== "") {
+                window.open(engine + encodeURIComponent(keyword), '_blank');
+            } else {
+                alert('请输入要搜索的关键词内容哦~');
+            }
+        }
+    </script>
+</body>
+</html>
